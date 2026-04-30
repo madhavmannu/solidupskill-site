@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SolidUpskill — Builder. Analyst. Explorer.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0d0f0e;
+      --surface:   #141714;
+      --border:    #1f231f;
+      --green:     #4caf7d;
+      --green-dim: #2d6b4a;
+      --amber:     #e8a838;
+      --text:      #e8e6e0;
+      --muted:     #7a8070;
+      --white:     #f5f3ee;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 4rem;
+      background: rgba(13,15,14,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 8rem 4rem 4rem;
+      position: relative;
+      gap: 4rem;
+    }
+
+    .hero-bg-circle {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(76,175,125,0.07) 0%, transparent 70%);
+      top: 50%;
+      right: -100px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.2s;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 5vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--white);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.4s;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--green);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.6s;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.8s;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      padding: 0.35rem 0.85rem;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface);
+    }
+
+    .tag.highlight {
+      border-color: var(--green-dim);
+      color: var(--green);
+      background: rgba(76,175,125,0.06);
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 1s;
+    }
+
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.85rem 2rem;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #0d0f0e;
+    }
+
+    .btn-primary:hover {
+      background: #5dc990;
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--green-dim);
+      color: var(--green);
+    }
+
+    /* Hero Right — Stats */
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.5s;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--green-dim); }
+
+    .stat-icon {
+      font-size: 1.8rem;
+      width: 48px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ── SECTION BASE ── */
+    section {
+      padding: 6rem 4rem;
+      position: relative;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 0 4rem;
+      width: calc(100% - 8rem);
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+      margin-top: 3rem;
+    }
+
+    .about-text p {
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+    }
+
+    .about-text p span {
+      color: var(--text);
+    }
+
+    .about-pillars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .pillar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .pillar:hover {
+      border-color: var(--green-dim);
+      transform: translateY(-3px);
+    }
+
+    .pillar-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+
+    .pillar-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+    }
+
+    .pillar-desc { font-size: 0.82rem; color: var(--muted); }
+
+    /* ── PROJECTS ── */
+    #projects { background: var(--surface); }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .project-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      border-color: var(--green-dim);
+      transform: translateY(-4px);
+    }
+
+    .project-card.featured {
+      grid-column: span 2;
+      border-color: var(--green-dim);
+      background: rgba(76,175,125,0.03);
+    }
+
+    .project-status {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 1.25rem;
+    }
+
+    .status-live { background: rgba(76,175,125,0.15); color: var(--green); }
+    .status-building { background: rgba(232,168,56,0.15); color: var(--amber); }
+    .status-concept { background: rgba(122,128,112,0.15); color: var(--muted); }
+
+    .project-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--white);
+      margin-bottom: 0.75rem;
+    }
+
+    .project-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    .project-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .tech-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      padding: 0.2rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+    }
+
+    /* ── SKILLS ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+
+    .skill-block {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.75rem 1.5rem;
+      background: var(--surface);
+      transition: border-color 0.2s;
+    }
+
+    .skill-block:hover { border-color: var(--green-dim); }
+
+    .skill-block-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 1rem;
+    }
+
+    .skill-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .skill-list li {
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .skill-list li::before {
+      content: '▸';
+      color: var(--green-dim);
+      font-size: 0.7rem;
+    }
+
+    /* ── CURRENTLY ── */
+    .currently-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .current-item {
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+
+    .current-item:hover { border-color: var(--green-dim); }
+
+    .current-emoji { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+    .current-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.35rem;
+    }
+
+    .current-text { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--surface); }
+
+    .contact-inner {
+      max-width: 600px;
+    }
+
+    .contact-form {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--green-dim);
+    }
+
+    .form-group textarea { min-height: 120px; }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .social-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.65rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .social-link:hover {
+      border-color: var(--green-dim);
+      color: var(--green);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 4rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1.25rem 2rem; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding: 7rem 2rem 3rem; }
+      .hero-right { display: none; }
+      section { padding: 4rem 2rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .project-card.featured { grid-column: span 1; }
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .currently-grid { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem 2rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+      .section-divider { margin: 0 2rem; width: calc(100% - 4rem); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Solid Upskill</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">Builder · Analyst · Explorer</p>
+      <h1 class="hero-title">Making things<br>that <em>matter.</em></h1>
+      <p class="hero-sub">
+        19 years of turning raw data into sharp decisions. Now building everything else — drones, products, code, experiences.
+      </p>
+      <div class="hero-tags">
+        <span class="tag highlight">Data Analytics</span>
+        <span class="tag highlight">SQL · Python</span>
+        <span class="tag">FPV Drones</span>
+        <span class="tag">Web Dev</span>
+        <span class="tag">Nature</span>
+        <span class="tag">INTJ</span>
+        <span class="tag">Bhagavad Gita</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">See My Work</a>
+        <a href="#contact" class="btn btn-outline">Get In Touch</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div>
+          <div class="stat-num">19</div>
+          <div class="stat-label">Years in Data Analytics</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🚁</div>
+        <div>
+          <div class="stat-num">FPV</div>
+          <div class="stat-label">Drones built from scratch</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌿</div>
+        <div>
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Trees I want to plant</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div>
+          <div class="stat-num">Now</div>
+          <div class="stat-label">Shipping real products</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-bg-circle"></div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-label">Who I Am</p>
+    <h2 class="section-title">Analyst brain.<br>Maker hands.</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>I've spent <span>19 years finding patterns</span> — in data, in systems, in the way things work. But the brain moves faster than spreadsheets allow, so I build to keep up.</p>
+        <p>From <span>FPV drones assembled from raw parts</span> to data pipelines that reveal what no one else noticed — I'm most alive when I'm making something real from nothing.</p>
+        <p>I'm drawn to <span>water, forests, and waterfalls</span>. I read the Bhagavad Gita. I lift weights. I believe the best ideas come from people who stay curious and keep showing up.</p>
+        <p>Right now I'm teaching myself to ship software — building products, launching sites, learning what it means to go from idea to live URL. <span>This site is proof of that.</span></p>
+      </div>
+      <div class="about-pillars">
+        <div class="pillar">
+          <div class="pillar-icon">📡</div>
+          <div class="pillar-title">Data Mind</div>
+          <div class="pillar-desc">SQL is my first language. Finding the insight others miss is the game.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🔧</div>
+          <div class="pillar-title">Maker Hands</div>
+          <div class="pillar-desc">If I can imagine it, I'll try to build it. Drones, code, or otherwise.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🌊</div>
+          <div class="pillar-title">Nature Soul</div>
+          <div class="pillar-desc">Water bodies, waterfalls, and forests are where I recharge and reset.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">📖</div>
+          <div class="pillar-title">Student Always</div>
+          <div class="pillar-desc">Bhagavad Gita. Therapy. Gym. Learning never stops — that's the point.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label">What I Build</p>
+    <h2 class="section-title">Projects &amp; Ideas</h2>
+    <div class="projects-grid">
+      <div class="project-card featured">
+        <span class="project-status status-building">Building</span>
+        <div class="project-title">Solid Upskill — Personal Hub</div>
+        <p class="project-desc">This site. A living space for projects, ideas, and work-in-progress experiments. Built from scratch as part of learning to ship real web products end-to-end — from domain to deployment.</p>
+        <div class="project-tech">
+          <span class="tech-pill">HTML/CSS</span>
+          <span class="tech-pill">GitHub</span>
+          <span class="tech-pill">Vercel</span>
+          <span class="tech-pill">GoDaddy DNS</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <span class="project-status status-live">Built</span>
+        <div class="project-title">FPV Racing Drone</div>
+        <p class="project-desc">Assembled from raw components. Frame, motors, ESC, flight controller, FPV camera — all tuned by hand. The most physical form of making I know.</p>
+        <div class="project-tech">
+          <span class="tech-pill">Embedded Systems</span>
+          <span class="tech-pill">Betaflight</span>
+          <span class="tech-pill">Hardware</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <span class="project-status status-concept">Concept</span>
+        <div class="project-title">Voices</div>
+        <p class="project-desc">A platform where people can voice structured opinions — not noise, but thesis-driven thought. An alternative to the chaos of current social discourse.</p>
+        <div class="project-tech">
+          <span class="tech-pill">Idea Stage</span>
+          <span class="tech-pill">Product Design</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <span class="project-status status-live">Past</span>
+        <div class="project-title">SQL Data Analytics Course</div>
+        <p class="project-desc">Built and taught a data analytics curriculum. Grew an organic following of 4,000+ students. The original reason solidupskill.com exists.</p>
+        <div class="project-tech">
+          <span class="tech-pill">SQL</span>
+          <span class="tech-pill">Education</span>
+          <span class="tech-pill">Content</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-label">Toolbox</p>
+    <h2 class="section-title">Skills &amp; Background</h2>
+    <div class="skills-grid">
+      <div class="skill-block">
+        <div class="skill-block-title">Data</div>
+        <ul class="skill-list">
+          <li>SQL (Advanced)</li>
+          <li>Data Analytics</li>
+          <li>Pattern Recognition</li>
+          <li>Data Modeling</li>
+          <li>Python (Learning)</li>
+        </ul>
+      </div>
+      <div class="skill-block">
+        <div class="skill-block-title">Building</div>
+        <ul class="skill-list">
+          <li>FPV Drone Assembly</li>
+          <li>Hardware Tinkering</li>
+          <li>Embedded Systems</li>
+          <li>Web Development</li>
+          <li>Server Setup</li>
+        </ul>
+      </div>
+      <div class="skill-block">
+        <div class="skill-block-title">Thinking</div>
+        <ul class="skill-list">
+          <li>Systems Thinking</li>
+          <li>Insight Extraction</li>
+          <li>Product Ideation</li>
+          <li>Teaching & Curriculum</li>
+          <li>Problem Framing</li>
+        </ul>
+      </div>
+      <div class="skill-block">
+        <div class="skill-block-title">Living</div>
+        <ul class="skill-list">
+          <li>Nature Exploration</li>
+          <li>Music Appreciation</li>
+          <li>Fitness & Recovery</li>
+          <li>Bhagavad Gita</li>
+          <li>Continuous Learning</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- CURRENTLY -->
+  <section id="currently">
+    <p class="section-label">Right Now</p>
+    <h2 class="section-title">What I'm up to</h2>
+    <div class="currently-grid">
+      <div class="current-item">
+        <div class="current-emoji">🏗️</div>
+        <div>
+          <div class="current-label">Building</div>
+          <div class="current-text">Shipping my first web product and learning full-stack development end to end</div>
+        </div>
+      </div>
+      <div class="current-item">
+        <div class="current-emoji">💪</div>
+        <div>
+          <div class="current-label">Training</div>
+          <div class="current-text">Back at the gym, rebuilding strength and recovering from cervical pain</div>
+        </div>
+      </div>
+      <div class="current-item">
+        <div class="current-emoji">📖</div>
+        <div>
+          <div class="current-label">Reading</div>
+          <div class="current-text">Daily practice with the Bhagavad Gita — some days better than others</div>
+        </div>
+      </div>
+      <div class="current-item">
+        <div class="current-emoji">🌿</div>
+        <div>
+          <div class="current-label">Exploring</div>
+          <div class="current-text">Planning the next waterfall trek and thinking about planting more trees</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label">Let's Connect</p>
+    <h2 class="section-title">Say Hello</h2>
+    <div class="contact-inner">
+      <p style="color: var(--muted); margin-bottom: 0.5rem;">Got a project idea, collaboration, or just want to talk about drones, data, or waterfalls?</p>
+      <form class="contact-form" onsubmit="handleSubmit(event)">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Your name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="What's on your mind?" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: fit-content;">Send Message</button>
+      </form>
+      <div class="social-links">
+        <a href="#" class="social-link">Instagram</a>
+        <a href="#" class="social-link">LinkedIn</a>
+        <a href="#" class="social-link">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Solid Upskill — Built &amp; shipped by hand</p>
+    <p>solidupskill.com</p>
+  </footer>
+
+  <script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.pillar, .project-card, .skill-block, .current-item, .stat-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+
+    // Contact form handler
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'Message Sent ✓';
+      btn.style.background = '#2d6b4a';
+      setTimeout(() => {
+        btn.textContent = 'Send Message';
+        btn.style.background = '';
+        e.target.reset();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
